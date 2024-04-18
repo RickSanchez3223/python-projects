@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Permissions</title>
+    <style>
+        body {
+            text-align: center;
+        }
+
+        h1{
+            text-align: center;
+        }
+        
+        .blue-heading {
+            color: blue;
+            text-decoration: underline;
+        }
+        
+        .black-heading {
+            text-decoration: none;
+            color: black;
+        }
+
+        .box {
+            border: 2px solid black;
+            padding: 20px;
+            display: inline-block;
+            text-align: left;
+        }
+
+        .permissions label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .green-button {
+            background-color: green;
+            color: white;
+            padding: 5px 10px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1><span class="blue-heading">Employee Management</span><span class="black-heading"> | User role: {{ user_role }}</span></h1>
+
+    <div class="box">
+        <h2>Manage Permissions</h2>
+        <form method="POST">
+            {{ form.csrf_token }}
+            <div class="permissions">
+                {% for permission in permissions %}
+                    <label>
+                        <input type="checkbox" name="permissions" value="{{ permission.name }}" {% if not permission.is_deleted %}checked{% endif %}>
+                        {{ permission.name }}
+                    </label>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="green-button">Confirm</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User List</title>
+    <style>
+        h1{
+            text-align: center;
+        }
+        
+        .blue-heading {
+            color: blue;
+            text-decoration: underline;
+        }
+        
+        .black-heading {
+            text-decoration: none;
+            color: black;
+        }
+        
+        .black-box {
+            border: 2px solid #e3dbdb;
+            padding: 20px;
+            width: 80%;
+            margin: 0 auto;
+            margin-top: 20px;
+        }
+
+        .role-heading {
+            font-weight: bold;
+            font-size: 20px;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+
+        .user-list {
+            margin-top: 10px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .user-list th, .user-list td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        .user-list th {
+            background-color: #f0f0f0;
+        }
+
+        .user-list tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .user-list tr:nth-child(odd) {
+            background-color: white;
+        }
+
+        .user-list .action-buttons button {
+            padding: 5px 10px;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+
+        .user-list .edit-button {
+            background-color: yellow;
+            color: black;
+        }
+
+        .user-list .delete-button {
+            background-color: red;
+            color: white;
+        }     
+
+        .export-buttons {
+            float: right;
+        }
+
+        .user-list .permission-delete-button {
+            background-color: red;
+            color: white;
+        } 
+
+        .user-list .role-delete-button {
+            background-color: red;
+            color: white;
+        }     
+
+        .search-filter {
+            margin-top: 20px;
+        }
+
+        #search-button {
+            background-color: #0aafafaf;
+            color: white;
+            padding: 5px 10px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+
+        }
+        #filter-button {
+            background-color: #3433fa;
+            color: white;
+            padding: 5px 10px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+
+        [id^="export-"] {
+            background-color: green;
+            color: white;
+            padding: 5px 10px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+
+        [id^="import-"] {
+            background-color: rgb(236, 142, 65);
+            color: white;
+            padding: 5px 10px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .popup-box {
+            color: #000;
+            background: #fff;
+            border: 1px solid #000;
+            padding: 20px;
+            min-width: 450px;
+            text-align: left;
+        }
+
+        h2 {
+            text-align: left;
+        }
+
+        .popup-select {
+            color: #000;
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .filter-heading {
+            margin-top: 0.5 rem;
+        }
+
+        .filter-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .popup-button {
+            margin-top: 10px;
+            text-align: right;
+        }
+
+        .close-button {
+        background: none;
+        border: none;
+        color: red;
+        font-size: 20px;
+        cursor: pointer;
+        }
+
+        #clear-filter {
+            background-color: red;
+        }
+
+        #apply-filter {
+            background-color: green;
+        }
+
+        .create-button {
+        background-color: #3433fa;
+        color: white;
+        padding: 5px 10px;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+        margin-right: 10px; /* Adjust the margin as needed */
+        float: right;
+        }
+
+        .logout-button {
+            background-color: red;
+            color: white;
+            padding: 8px 16px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px; /* Add margin to move the button away from the box */
+        }
+
+        .center {
+            text-align: center;
+        }
+        
+        .popup-box #close-import-popup {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: transparent;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        #file-upload-form {
+            margin-top: 20px;
+        }
+
+        #file-upload-form input[type="file"] {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        #submit-import {
+            background: green;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        .user-list .action-buttons button.disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        pointer-events: none;
+        }
+
+        .disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <h1><span class="blue-heading">Employee Management</span><span class="black-heading"> | User role: {{ user_role }}</span></h1>
+
+    <div class="black-box">
+        <div class="export-buttons">
+            <button id="export-csv" class="btn btn-success" onclick="exportData('csv')">Export CSV</button>
+            <button id="export-xlsx" class="btn btn-success" onclick="exportData('xlsx')">Export XLSX</button>
+            <button id="export-json" class="btn btn-success" onclick="exportData('json')">Export JSON</button>
+        </div>        
+        {% if 'Admin Access' in user_permissions %}
+        <div class="import-buttons">
+            <button id="import-button" class="btn btn-success" >Import From File</button>
+        </div>    
+        {% endif %} 
+
+        <div class="search-filter">
+            <input type="text" id="search-input" placeholder="Search..." value="{{ query_params['search']}}">
+            <button id="search-button" class="btn btn-primary" onclick="applyFilter()">Search</button>
+            <button id="filter-button" class="btn btn-primary" onclick="openFilterPopUp()">Filter</button>
+        </div>
+
+        {% for role, users in users_by_role.items() %}
+        <div class="role-heading">{{ role+'s' }}
+            <button class="create-button {% if ('Admin Access' not in user_permissions) and ('Add Employee' not in user_permissions) %}disabled{% endif %}" onclick="redirectToCreatePage('{{ role }}')">Create {{ role }}</button>
+        </div>
+        <table class="user-list">
+            <thead>
+                <tr>
+                    {% for key, value in users[0].items() %}
+                    <th>{{ key }}</th>
+                    {% endfor %}
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set is_even = true %}
+                {% for user in users %}
+                <tr class="{% if is_even %}grey-row{% else %}white-row{% endif %}">
+                    {% for key, value in user.items() %}
+                    {% if key == 'Name' and 'Email' in user%}
+                    <td id={{key}}><a href="{{USER_DETAILS_URL}}?email={{ user['Email'] }}">{{ value }}</a></td>
+                    {% else %}
+                        <td id={{key}}>{{ value }}</td>
+                    {% endif %}
+                    {% endfor %}
+                    <td class="action-buttons">
+                        <button class="edit-button {% if ('Admin Access' not in user_permissions) and ('Edit Employee' not in user_permissions) %}disabled{% endif %}">Edit</button>
+                        <button class="delete-button {% if ('Admin Access' not in user_permissions) and ('Delete Employee' not in user_permissions) %}disabled{% endif %}" id="user-delete">Delete</button>
+                    </td>
+                </tr>
+                {% set is_even = not is_even %}
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endfor %}
+
+        {% if 'Admin Access' in user_permissions %}
+        <!-- Add "Permissions" Section -->
+        <div class="role-heading">Permissions
+            <button class="create-button" onclick="redirectToCreatePermissionPage('{{ role }}')">Manage Permission</button>
+        </div>
+        <table class="user-list">
+            <thead>
+                <tr>
+                    {% for key in permissions[0].keys() %}
+                    <th>{{ key }}</th>
+                    {% endfor %}
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set is_even = true %}
+                {% for permission in permissions %}
+                <tr class="{% if is_even %}grey-row{% else %}white-row{% endif %}">
+                    {% for pkey, pvalue in permission.items() %}
+                    <td id={{pkey}}>{{ pvalue }}</td>
+                    {% endfor %}
+                    <td class="action-buttons">
+                        <button class="permission-delete-button">Delete</button>
+                    </td>
+                </tr>
+                {% set is_even = not is_even %}
+                {% endfor %}
+            </tbody>
+        </table>
+    
+        <!-- Add "Roles" Section -->
+        <div class="role-heading">Roles
+            <button class="create-button" onclick="redirectToCreateRolePage('{{ role }}')">Create Role</button>
+        </div>
+        <table class="user-list">
+            <thead>
+                <tr>
+                    {% for key in roles[0].keys() %}
+                    <th>{{ key }}</th>
+                    {% endfor %}
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set is_even = true %}
+                {% for role in roles %}
+                <tr class="{% if is_even %}grey-row{% else %}white-row{% endif %}">
+                    {% for rkey, rvalue in role.items() %}
+                    <td id={{rkey}}>{{ rvalue }}</td>
+                    {% endfor %}
+                    <td class="action-buttons">
+                        <button class="role-delete-button">Delete</button>
+                    </td>
+                </tr>
+                {% set is_even = not is_even %}
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+
+    <div class="center">
+        <form action="{{ url_for('login-logout.logout_view') }}" method="post">
+            <input class="logout-button" type="submit" value="Logout">
+        </form>
+    </div>
+
+    <div class="popup" id="filter-popup">
+        <div class="popup-box">
+            <div class="filter-header">
+                <h2 class="filter-heading">Filters</h2>
+                <button id="close-popup" class="close-button" onclick="closeFilterPopUp()">X</button>
+            </div>
+            <div class="filter-form">
+                <label for="designation-filter">Designation:</label>
+                <select id="designation-filter" class="popup-select" multiple>
+                    <option value="">Select Designation</option>
+                    {% for designation in designations %}
+                        <option value="{{designation}}" {% if designation in query_params['designations'] %}selected{% endif %}>{{ designation }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="department-filter">Department:</label>
+                <select id="department-filter" class="popup-select" multiple>
+                    <option value="">Select Department</option>
+                    {% for department in departments %}
+                        <option value="{{department}}" {% if department in query_params['departments'] %}selected{% endif %}>{{ department }}</option>
+                    {% endfor %}
+                </select>
+
+                <div class="popup-button">
+                    <button id="clear-filter" class="popup-button" onclick="applyFilter(true)">Clear</button>
+                    <button id="apply-filter" class="popup-button" onclick="applyFilter()">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="popup" id="import-popup">
+        <div class="popup-box">
+
+            <div class="filter-header">
+                <h2 class="filter-heading">Upload File</h2>
+                <button id="close-popup" class="close-button" onclick="closeImportPopup()">X</button>
+            </div>
+            <div id="file-upload-form" enctype="multipart/form-data">
+                <p>Supported file formats: CSV, JSON, XLSX</p>
+                <input type="file" name="file" accept=".csv, .json, .xlsx">
+                <button id="submit-import" class="popup-button" onclick="submitFile()">Submit</button>
+            </div>
+            <p id="error-message" style="color: red;"></p>
+        </div>
+    </div>
+
+    <script>
+
+    function exportData(format) {
+    var designationSelect = document.getElementById("designation-filter");
+    var selectedDesignations = Array.from(designationSelect.selectedOptions).map(option => option.value).join(',');
+
+    // Retrieve selected values from the "Department" dropdown
+    var departmentSelect = document.getElementById("department-filter");
+    var selectedDepartments = Array.from(departmentSelect.selectedOptions).map(option => option.value).join(',');
+
+
+    // Now you can use the selectedDesignations and selectedDepartments arrays as needed
+    console.log("Selected Designations: ", selectedDesignations);
+    console.log("Selected Departments: ", selectedDepartments);
+
+
+    const searchValue = document.getElementById('search-input').value || '';
+    console.log({searchValue, selectedDesignations, selectedDepartments})
+    const url = `{{USERS_EXPORT_URL}}?format=${format}&search=${searchValue}&designations=${selectedDesignations}&departments=${selectedDepartments}`;
+    fetch(url)
+        .then(response => response.blob())
+        .then(blob => {
+            const filename = `users.${format}`;
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+        })
+        .catch(error => {
+            console.error('Error exporting data:', error);
+        });
+    }
+
+    function redirectToCreatePage(role) {
+        // Construct the URL with the dynamic role as a query parameter
+        var url = "{{ url_for('create-user.create_user_view') }}?role=" + encodeURIComponent(role);
+
+        // Redirect to the new page
+        window.location.href = url;
+    }
+
+    function redirectToCreatePermissionPage(role) {
+        var url = "{{ url_for('permissions.manage_permission') }}";
+
+        // Redirect to the new page
+        window.location.href = url;
+    }
+
+    function redirectToCreateRolePage(role) {
+        var url = "{{ url_for('roles.create_role') }}";
+
+        // Redirect to the new page
+        window.location.href = url;
+    }
+
+    const roleDeleteButtons = document.querySelectorAll('.role-delete-button');
+    
+    roleDeleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Get the role from the current row (assuming it's in a <td> element)
+            const role = this.closest('tr').querySelector('td[id="Name"]').textContent;
+            console.log(role)
+            // Show a confirmation dialog
+            const confirmation = confirm(`Are you sure you want to delete the role: ${role}?`);
+
+            if (confirmation) {
+                // Construct the URL with the query parameter for delete
+                const deleteURL = `{{ROLE_DELETE_URL}}?name=${encodeURIComponent(role)}`; // Replace with your delete user URL
+
+                // Send an HTTP request to delete the role
+                fetch(deleteURL)
+                    .then(response => {
+                        if (response.status === 200) {
+                            alert('Role deleted successfully.');
+                            window.location.reload();
+                        } else {
+                            alert('Role does not exist or an error occurred while deleting.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        alert('An error occurred while deleting the role.');
+                    });
+            }
+        });
+    });
+
+    const permissionDeleteButtons = document.querySelectorAll('.permission-delete-button');
+    
+    permissionDeleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Get the permission from the current row (assuming it's in a <td> element)
+            const permission = this.closest('tr').querySelector('td[id="Name"]').textContent;
+            console.log(permission)
+            // Show a confirmation dialog
+            const confirmation = confirm(`Are you sure you want to delete the permission: ${permission}?`);
+
+            if (confirmation) {
+                // Construct the URL with the query parameter for delete
+                const deleteURL = `{{PERMISSION_DELETE_URL}}?name=${encodeURIComponent(permission)}`; // Replace with your delete user URL
+
+                // Send an HTTP request to delete the Permission
+                fetch(deleteURL)
+                    .then(response => {
+                        if (response.status === 200) {
+                            alert('Permission deleted successfully.');
+                            window.location.reload();
+                        } else {
+                            alert('Permission does not exist or an error occurred while deleting.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        alert('An error occurred while deleting the permission.');
+                    });
+            }
+        });
+    });
+
+    const userDeleteButtons = document.querySelectorAll('[id="user-delete"]');
+    
+    userDeleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Get the email from the current row (assuming it's in a <td> element)
+            const email = this.closest('tr').querySelector('#Email').textContent; // Replace '#Email' with the actual ID of the email cell
+
+            // Show a confirmation dialog
+            const confirmation = confirm(`Are you sure you want to delete the user with email: ${email}?`);
+
+            if (confirmation) {
+                // Construct the URL with the query parameter for delete
+                const deleteURL = `{{USER_DELETE_URL}}?email=${encodeURIComponent(email)}`; // Replace with your delete user URL
+
+                // Send an HTTP request to delete the user
+                fetch(deleteURL)
+                    .then(response => {
+                        if (response.status === 200) {
+                            alert('User deleted successfully.');
+                            window.location.reload();
+                        } else {
+                            alert('User does not exist or an error occurred while deleting.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        alert('An error occurred while deleting the user.');
+                    });
+            }
+        });
+    });
+
+
+    const editButtons = document.querySelectorAll('.edit-button');
+    editButtons.forEach(button => {
+    button.addEventListener('click', function() {
+    // Get the email from the current row (assuming it's in a <td> element)
+    const email = this.closest('tr').querySelector('#Email').textContent; // Replace '.email-column' with the actual class or element selector for the email cell
+    
+    // Construct the URL with the query parameter
+    const redirectTo = `{{USER_EDIT_URL}}?email=${encodeURIComponent(email)}`; // Replace '/edit-page' with your desired URL
+    
+    console.log(redirectTo)
+    // Redirect to the new URL
+    window.location.href = redirectTo;
+    });
+    });
+
+    function applyFilter(clearFilter=false) {
+        var designationSelect = document.getElementById("designation-filter");
+        var selectedDesignations = Array.from(designationSelect.selectedOptions).map(option => option.value).join(',');
+
+        // Retrieve selected values from the "Department" dropdown
+        var departmentSelect = document.getElementById("department-filter");
+        var selectedDepartments = Array.from(departmentSelect.selectedOptions).map(option => option.value).join(',');
+
+
+        // Now you can use the selectedDesignations and selectedDepartments arrays as needed
+        console.log("Selected Designations: ", selectedDesignations);
+        console.log("Selected Departments: ", selectedDepartments);
+
+
+        const searchValue = document.getElementById('search-input').value || '';
+        console.log({searchValue, selectedDesignations, selectedDepartments})
+        let redirectTo = `{{USER_LIST_URL}}?search=${searchValue}&designations=${selectedDesignations}&departments=${selectedDepartments}`
+        if (clearFilter) {
+            redirectTo = `{{USER_LIST_URL}}?search=${searchValue}`
+        }
+        console.log(redirectTo)
+        window.location.href = redirectTo;
+    };
+
+    function openFilterPopUp() {
+        document.getElementById('filter-popup').style.display="flex"
+    }
+
+    function closeFilterPopUp() {
+        document.getElementById('filter-popup').style.display="none"
+    }
+
+    // Function to open the import popup
+    function openImportPopup() {
+        document.getElementById('import-popup').style.display = 'flex';
+    }
+
+    // Function to close the import popup
+    function closeImportPopup() {
+        document.getElementById('import-popup').style.display = 'none';
+    }
+
+    // Function to submit the file
+    function submitFile() {
+        const fileInput = document.querySelector('input[type="file"]');
+        const file = fileInput.files[0];
+
+        if (!file) {
+            document.getElementById('error-message').textContent = 'Please select a file.';
+            return;
+        }
+
+        const fileExtension = file.name.split('.').pop().toLowerCase();
+        if (!['csv', 'json', 'xlsx'].includes(fileExtension)) {
+            document.getElementById('error-message').textContent = 'Invalid file format. Please select a CSV, JSON, or XLSX file.';
+            return;
+        }
+
+        // Perform the actual file upload to your API endpoint
+        const formData = new FormData();
+        formData.append('file', file);
+
+        fetch('{{USERS_IMPORT_URL}}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('error-message').textContent = 'File upload failed: ' + data.error;
+            } else {
+                // Display a success message
+                document.getElementById('error-message').textContent = 'File upload successful!';
+                // Redirect to the home page after a short delay (e.g., 2 seconds)
+                setTimeout(function() {
+                    window.location.href = '{{USER_LIST_URL}}'; 
+                }, 1500); // 2000 milliseconds = 2 seconds
+            }
+        })
+        .catch(error => {
+            document.getElementById('error-message').textContent = 'An error occurred: ' + error.message;
+        });
+    }
+
+    // Attach click event handlers to the import buttons
+    document.getElementById('import-button').addEventListener('click', openImportPopup);
+    
+    </script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee Management</title>
+    <style>
+        .blue-heading {
+            color: blue;
+            text-decoration: underline;
+            text-align: center; /* Center align the heading */
+        }
+        .wide-box {
+            width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white; /* Set the box background to white */
+            border: 2px solid #e3dbdb; /* Add a black outline to the box */
+        }
+        .left-align {
+            text-align: left; /* Left-align the contents inside the box */
+        }
+        .submit-button {
+            background-color: green;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px; /* Add margin to move the button down */
+        }
+    </style>
+</head>
+<body>
+    <h1 class="blue-heading">Employee Management</h1>
+    <div class="wide-box">
+        <h2 class="left-align">Login</h2> <!-- Add a left-aligned heading "Login" within the box -->
+        <form method="POST" class="left-align">
+            {{ form.hidden_tag() }}
+            <div>
+                {{ form.email_or_phone.label }}
+            </div>
+            <div>
+                {{ form.email_or_phone(size=32) }}
+            </div>
+            <div>
+                {{ form.password.label }}
+            </div>
+            <div>
+                {{ form.password(size=32) }}
+            </div>
+            <!-- Display flash messages -->
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+              <ul style="list-style-type: none;">
+                {% for message in messages %}
+                  <li style="color: red;">{{ message }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+            {% endwith %}
+            <div>
+                <input class="submit-button" type="submit" value="Submit">
+            </div>
+        </form>
+    </div>
+</body>
+</html>

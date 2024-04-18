@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee Management</title>
+    <style>
+        .left-align {
+            text-align: left;
+        }
+        .blue-heading {
+            color: blue;
+            text-decoration: underline;
+        }
+        .user-details-box {
+            width: 400px; /* Wider center box */
+            margin: 0 auto;
+            border: 2px solid #e3dbdb;
+            padding: 10px;
+            text-align: left; /* Left-align the contents inside the box */
+        }
+        .center {
+            text-align: center;
+        }
+        .logout-button {
+            background-color: red;
+            color: white;
+            padding: 8px 16px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px; /* Add margin to move the button away from the box */
+        }
+        .black-heading {
+            text-decoration: none;
+            color: black;
+        }
+        .home-button {
+            background-color: green;
+            color: white;
+            padding: 8px 16px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin-left: 10px; /* Add margin to move the button away from the logout button */
+        }
+    </style>
+</head>
+<body>
+    <div class="center">
+        <h1><span class="blue-heading">Employee Management</span><span class="black-heading"> | User role: {{ user_role }}</span></h1>
+        <!-- Display flash messages -->
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul style="list-style-type: none;">
+            {% for message in messages %}
+                <li style="color: red;">{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="center">
+        <div class="user-details-box">
+            <h2 class="left-align">{{ user.role }}</h2> <!-- Larger heading left-aligned -->
+            {% if user.name %}
+                <p class="left-align">Name: {{ user.name }}</p>
+            {% endif %}
+            {% if user.email %}
+                <p class="left-align">Email: {{ user.email }}</p>
+            {% endif %}
+            {% if user.employee_id %}
+                <p class="left-align">Employee ID: {{ user.employee_id }}</p>
+            {% endif %}
+            {% if user.phone_number %}
+                <p class="left-align">Phone: {{ user.phone_number }}</p>
+            {% endif %}
+            {% if user.designation %}
+                <p class="left-align">Designation: {{ user.designation }}</p>
+            {% endif %}
+            {% if user.manager %}
+                <p class="left-align">Manager: {{ user.manager.name }}</p>
+            {% endif %}
+            {% if user.department %}
+                <p class="left-align">Department: {{ user.department }}</p>
+            {% endif %}
+            {% if user.hired_date %}
+                <p class="left-align">Hired Date: {{ user.hired_date }}</p>
+            {% endif %}
+            <!-- Add other user details here as needed -->
+        </div>
+    </div>
+
+    <div class="center">
+        <form action="{{ url_for('login-logout.logout_view') }}" method="post">
+            <input class="logout-button" type="submit" value="Logout">
+        </form>
+    
+        {% if 'Admin Access' in user_permissions or 'View Employee' in user_permissions %}
+        <form action="{{ url_for('user-details.user_list_view') }}" method="get" style="padding: 10px;">
+            <input class="home-button" type="submit" value="Manage Users">
+        </form>
+        {% endif %}
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit User</title>
+    <style>
+        h1{
+            text-align: center;
+        }
+        
+        .blue-heading {
+            color: blue;
+            text-decoration: underline;
+        }
+        
+        .black-heading {
+            text-decoration: none;
+            color: black;
+        }
+
+        /* Styling for Employee Management heading */
+        .blue-heading {
+            color: blue;
+            text-align: center;
+            text-decoration: underline;
+        }
+
+        /* Styling for the black border box */
+        .black-box {
+            border: 2px solid #e3dbdb;
+            padding: 20px;
+            width: 400px;
+            margin: 0 auto;
+        }
+
+        /* Styling for the 'Create Employee' heading */
+        .create-employee-heading {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        /* Styling for the input fields */
+        .form-control {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+
+        /* Styling for the submit button */
+        .green-button {
+            background-color: green;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Styling for error messages */
+        .errors {
+            color: red;
+            font-size: 12px;
+            margin-top: 4px;
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .manager-list {
+        list-style: none; /* Remove bullets */
+        padding: 0; /* Remove default padding */
+        }
+
+        .manager-result {
+            cursor: pointer; /* Show pointer cursor on hover */
+            padding: 5px 10px; /* Add padding to each list item */
+            background-color: #f2f2f2; /* Background color for each list item */
+            margin-bottom: 5px; /* Add some vertical spacing between list items */
+        }
+
+        .manager-result:hover {
+            background-color: #ddd; /* Background color on hover */
+        }
+    </style>
+</head>
+<body>
+    <h1><span class="blue-heading">Employee Management</span><span class="black-heading"> | User role: {{ user_role }}</span></h1>
+
+    <div class="black-box">
+        <h2 class="create-employee-heading">Edit Employee</h2>
+        <form id="userForm" method="POST">
+            {{ form.hidden_tag() }}
+            <div>
+                <label for="name">Name:</label>
+                {{ form.name(class="form-control", id="name") }}
+                {% if form.name.errors %}
+                <ul class="errors">
+                    {% for error in form.name.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="email">Email:</label>
+                {{ form.email(class="form-control", id="email", readonly=true) }}
+                <!-- Display email as readonly, since it's not editable -->
+            </div>
+
+            <div>
+                <label for="phone">Phone Number:</label>
+                {{ form.phone(class="form-control", id="phone") }}
+            </div>
+
+            <div>
+                <label for="designation">Designation:</label>
+                {{ form.designation(class="form-control", id="designation") }}
+            </div>
+
+            <div>
+                <label for="department">Department:</label>
+                {{ form.department(class="form-control", id="department") }}
+            </div>
+
+            <div>
+                <label for="manager">Manager:</label>
+                {{ form.manager(class="form-control", id="manager", autocomplete="off", onkeyup="searchManager(this.value)") }}
+                {% if form.manager.errors %}
+                    <ul class="errors">
+                        {% for error in form.manager.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <ul id="managerResults" class="manager-list"></ul> <!-- Display search results here -->
+                {{ form.manager_id(id="manager_id") }} <!-- Hidden field to store manager ID -->
+            </div>
+
+            <!-- Display Manager search results here -->
+
+            <div>
+                <label for="hired_date">Hired Date:</label>
+                {{ form.hired_date(class="form-control", id="hired_date") }}
+            </div>
+
+            <div>
+                <input type="submit" class="green-button" value="Update">
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const managerResults = document.getElementById('managerResults')
+        function searchManager(value) {
+            // Implement manager search logic using JavaScript here
+            // Display search results dynamically as the user types
+            fetch(
+                // To do: make this an env variable
+                '{{SEARCH_MANAGERS_URL}}',{
+                method: 'POST',
+                body: JSON.stringify({ search: value }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(res => res.json())
+            .then(function(data) {
+                    // Display search results in the 'managerResults' datalist
+                    localStorage.setItem('searchManagers', data.results_html)
+                    managerResults.innerHTML=data.results_html;
+                });
+        }
+
+        // Function to set the selected manager's ID
+        function selectManager(managerId, managerName) {
+            document.getElementById('manager').value=managerName; // Display the selected manager's name
+            [...document.querySelectorAll('[id="manager_id"]')].forEach(element => element.value = managerId);
+             // Set the selected manager's ID in the hidden field
+            managerResults.innerHTML=null; // Clear the search results
+        }
+    </script>
+</body>
+</html>
